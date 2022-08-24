@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Public Key management with Signed JWKS</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Public Key management with Signed JWKS</h1>
+</header>
+<h1 id="introduction">Introduction</h1>
+<p>This specification outlines how entities within the <em>Finnish Trust Network</em> (FTN) publish public keys used for signing and encrypting <em>OpenID Connect</em> protocol messages.</p>
+<p>The purpose is to provide an additional layer of security and integrity protection for management of public keys.</p>
+<p>This is a profile of <em>OpenID Connect Federation</em> specification focusing on the entity statement and signed jwks features.</p>
+<h1 id="entity-statement">Entity Statement</h1>
+<p><a href="https://openid.net/specs/openid-connect-federation-1_0.html#section-3.1">https://openid.net/specs/openid-connect-federation-1_0.html#section-3.1</a></p>
+<p>An Entity Statement contains the information needed for the Entity that is the subject of the Entity Statement to participate in federation(s). An Entity Statement is always a signed JWT. The subject of the JWT is the Entity itself. The issuer of the JWT is the party that issued the Entity Statement, which will often be the Entity itself.</p>
+<p>Mandatory parameters</p>
+<ul>
+<li>iss
+<ul>
+<li>REQUIRED. The Entity Identifier of the issuer of the statement.</li>
+</ul></li>
+<li>sub
+<ul>
+<li>REQUIRED. The Entity Identifier of the subject.</li>
+<li>FTN: Subject MUST be same as issuer.</li>
+</ul></li>
+<li>iat
+<ul>
+<li>REQUIRED. The time the statement was issued. Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time.</li>
+</ul></li>
+<li>exp
+<ul>
+<li>REQUIRED. Expiration time on or after which the statement MUST NOT be accepted for processing. Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time.</li>
+</ul></li>
+<li>jwks
+<ul>
+<li>REQUIRED. A JSON Web Key Set (JWKS) representing the public part of the subject Entity's signing keys. The corresponding private key is used by leaf entities to sign Entity Statements about themselves, and intermediate entities to sign statements about other entities. The keys that can be found here are intended to sign Entity Statements and SHOULD NOT be used in other protocols.</li>
+</ul></li>
+<li>metadata
+<ul>
+<li>REQUIRED Conditional. JSON object including protocol specific metadata claims that represent the Entity's metadata.</li>
+<li>FTN: Possible metadata type identifiers: openid_provider and openid_relying_party</li>
+</ul></li>
+</ul>
+<h1 id="signed-jwks">Signed JWKS</h1>
+<p><a href="https://openid.net/specs/openid-connect-federation-1_0.html#section-4.1">https://openid.net/specs/openid-connect-federation-1_0.html#section-4.1</a></p>
+<p>Signed JWKS is a signed JWT having the entity's JWK Set as payload. The JWT is signed with a key that was included in the JWK set that the entity published in its (self-signed) entity statement.</p>
+<p>Mandatory parameters</p>
+<ul>
+<li>iss
+<ul>
+<li>REQUIRED. The "iss" (issuer) claim identifies the principal that issued the JWT.</li>
+</ul></li>
+<li>sub
+<ul>
+<li>REQUIRED. This claim identifies the owner of the keys.</li>
+<li>FTN: Subject MUST be same as issuer.</li>
+</ul></li>
+<li>keys
+<ul>
+<li>REQUIRED. List of JWKs.</li>
+</ul></li>
+</ul>
+<h2 id="signed_jwks_uri">signed_jwks_uri</h2>
+<p>A URI pointing to a signed JWT having the entity's JWK Set as payload. This parameter MUST exist in metadata embedded in Entity Statement.</p>
+<h1 id="processing">Processing</h1>
+<h2 id="publish-entity-statement">Publish entity statement</h2>
+<ol>
+<li>Generate current and next key pair</li>
+<li>Build JWK set from current and next key pair</li>
+<li>Build entity statement JWT (iss, sub, iat, exp, jwks and metadata claims)</li>
+<li>Sign JWT with current key</li>
+</ol>
+<h2 id="publish-protocol-public-keys">Publish protocol public keys</h2>
+<ol>
+<li>Fetch protocol JWK set</li>
+<li>Build signed jwks JWT (iss, sub and keys claims)</li>
+<li>Sign JWT with current key</li>
+</ol>
+<h2 id="validate-entity-statement">Validate entity statement</h2>
+<ol>
+<li>Decode entity statement JWT</li>
+<li>Make sure iss and sub are same and match known entity</li>
+<li>Read exp claim and validate statement has not expired</li>
+<li>Read JWK set from entity statement and validate signature of entity statement JWT</li>
+</ol>
+<h2 id="consume-protocol-public-keys">Consume protocol public keys</h2>
+<ol>
+<li>Validate entity statement</li>
+<li>Read signed_jwks_uri from entity statement metadata and fetch signed jwks JWT</li>
+<li>Read JWK set from entity statement and validate signature of signed jwks JWT</li>
+<li>Make sure iss and sub are same and match entity statement values</li>
+</ol>
+<h1 id="notes">Notes</h1>
+<h2 id="federation-operator">Federation Operator</h2>
+<p>In Finnish Trust Network there is no Federation Operator or trusted third party. All entities are acting as Leaf Entities. Each entity will publish a self-signed Entity Statement.</p>
+<h2 id="lifecycle-of-keys">Lifecycle of keys</h2>
+<p>The self-signed entity statement and signed jwks are signed with keys that have fairly long expiration (years or several months). This long expiration also allows out-of-band sharing of the entity statement.</p>
+<p>The keys within signed jwks are used for signing and encrypting OIDC protocol messages. These keys have shorter expiration (months or weeks).</p>
+<h1 id="examples">Examples</h1>
+<h2 id="entity-statement-1">Entity Statement</h2>
+<h3 id="jwt">JWT</h3>
+<pre><code>eyJhbGciOiAiUlMyNTYiLCAia2lkIjogImVudGl0eS1zdGF0ZW1lbnQta2V5LTEiLCAidH
+lwIjogIkpXVCJ9.ew0KICAiZXhwIjogMTcyNDM3MTIwMCwNCiAgInN1YiI6ICJodHRwczo
+vL2V4YW1wbGUuY29tIiwNCiAgImlzcyI6ICJodHRwczovL2V4YW1wbGUuY29tIiwNCiAgI
+m1ldGFkYXRhIjogew0KICAgICJvcGVuaWRfcHJvdmlkZXIiOiB7DQogICAgICAic2lnbmV
+kX2p3a3NfdXJpIjogImh0dHBzOi8vaWRwLmV4YW1wbGUuY29tL3NpZ25lZC1qd2tzIiwNC
+iAgICAgICJpc3N1ZXIiOiAiaHR0cHM6Ly9pZHAuZXhhbXBsZS5jb20iDQogICAgfQ0KICB
+9LA0KICAiandrcyI6IHsNCiAgICAia2V5cyI6IFsNCiAgICAgIHsNCiAgICAgICAgImUiO
+iAiQVFBQiIsDQogICAgICAgICJraWQiOiAiZW50aXR5LXN0YXRlbWVudC1rZXktMSIsDQo
+gICAgICAgICJrdHkiOiAiUlNBIiwNCiAgICAgICAgIm4iOiAidmwtWnNBdzVpVFFPOGIyZ
+kJPZ1dMZGlKYjlLcWtsalR0c29UaEhRaUk4QzdGQWZwaENwSmVZUHNIczhxeGpLNDFvWnR
+wNGwzdjZvLURnMVRKbkpxLUNFR2F3eElzazBBYVhTQ2ZpOEtVOHJQZXpESS15a3FLT1QxY
+VEwX29MTW9XZmlEMHM3UFNvMHJuUXQ0S3hsY1Q0S3dZSERudWMzczY0WWx6aFdpc0JFb0Z
+NeVQ1RU1kRS1XR0ttRFhhaGVJa1dseHVMbjkzVEFSQVdwTjNVVTh2dmY4akgtekROa0VmT
+zRlbnJnWFMwRDdzNTZ5dWp6MXVIVUN1S1VXb3NmbGdrLW52YWMzV0djVGpNOXI4RU9GX05
+sZUFNMm1haGRhY001UGQwWFo5dmZlWVVXakxsSGFFMmVTbDluOFhVX19peDFLZmxiNEFac
+E1LT25ic0VuSTl3IiwNCiAgICAgICAgInVzZSI6ICJzaWciDQogICAgICB9LA0KICAgICA
+gew0KICAgICAgICAiZSI6ICJBUUFCIiwNCiAgICAgICAgImtpZCI6ICJlbnRpdHktc3Rhd
+GVtZW50LWtleS0yIiwNCiAgICAgICAgImt0eSI6ICJSU0EiLA0KICAgICAgICAibiI6ICJ
+tamhoTEdhNVFUSHI0RXdGcXFZbmFhMm1mbkJ5YURzVXVlRlk2dFFvSEJ3OXBhUkdWM3ZzN
+1JjTHY5RHNPZXFlaERCSkZlZFF5ek9iQ0xFT0pacnk3WjRfM2VoWGNjZl9KMlpMU3dFTGh
+CcDVpTWxCZkZHQ1kxTmNHemUyY21wYWVNS3FrdUc2TTdMM3k1RzJVZGx5dHlYQmI1bGFiT
+k5BRUNUbVhrb01Jai1qNEg1b2V4OFpJMVBhRFJGTG5hS2xCY2VxTmViZ0NqYW43U2tTa0d
+ScHZuSWZqaVo3N1lDc2Y5Z0VHQVBKRjZwZDNTSGF5UWJtb3hVQXlNNU9qdUN0dmhBeVhKb
+kl2RzdJblVlSThReGx3Yjh2anhVajZ2X0JGVTJ3QzVtQnZvbVdVVlRMWmhYV3VXT2VTMkp
+jdHBwQkNIVURZcWdLc3lqSHpoZVRoYmVIalEiLA0KICAgICAgICAidXNlIjogInNpZyINC
+iAgICAgIH0NCiAgICBdDQogIH0sDQogICJpYXQiOiAxNjYxMjEyODAwDQp9.vEW02VDNpO
+NTc-Nk8fXzPHG-giPqjyZzLrSu2SWouDVZhrB0dUsuzpSsJRssutD6_8_aeIpAaN_NgG_h
+jLOqfRFrX5NrHNwcMqIrIij2Lr-TIcz4ViAud6tR7JQs2I_1xkNaXOBgE39d29nD31us9H
+khqTmL-hFBylI1ibXmYDxaDRQfOHE29fLkAF69fNkStMF3NQszm5yp9ZuFowj6xtDSc3NQ
+JELb2_PPvwN90gCcfTLeJyGY5HTQi8OFUR5qBuGCZvc9MFgfqC-dI-bG1gowppbOa_OP5G
+ROl_i6DeG9TL2vhMajOErY7ru_j4EGtg2CnYOPkKc0w6q-KZk82w
+</code></pre>
+<h3 id="jwt-header">JWT header</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="fu">{</span><span class="dt">&quot;alg&quot;</span><span class="fu">:</span> <span class="st">&quot;RS256&quot;</span><span class="fu">,</span> <span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;entity-statement-key-1&quot;</span><span class="fu">,</span> <span class="dt">&quot;typ&quot;</span><span class="fu">:</span> <span class="st">&quot;JWT&quot;</span><span class="fu">}</span></span></code></pre></div>
+<h3 id="jwt-body">JWT body</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>  <span class="dt">&quot;exp&quot;</span><span class="fu">:</span> <span class="dv">1724371200</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  <span class="dt">&quot;sub&quot;</span><span class="fu">:</span> <span class="st">&quot;https://example.com&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>  <span class="dt">&quot;iss&quot;</span><span class="fu">:</span> <span class="st">&quot;https://example.com&quot;</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a>  <span class="dt">&quot;metadata&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a>    <span class="dt">&quot;openid_provider&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a>      <span class="dt">&quot;signed_jwks_uri&quot;</span><span class="fu">:</span> <span class="st">&quot;https://idp.example.com/signed-jwks&quot;</span><span class="fu">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a>      <span class="dt">&quot;issuer&quot;</span><span class="fu">:</span> <span class="st">&quot;https://idp.example.com&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a>    <span class="fu">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a>  <span class="fu">},</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a>  <span class="dt">&quot;jwks&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a>    <span class="dt">&quot;keys&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a>      <span class="fu">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a>        <span class="dt">&quot;e&quot;</span><span class="fu">:</span> <span class="st">&quot;AQAB&quot;</span><span class="fu">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a>        <span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;entity-statement-key-1&quot;</span><span class="fu">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a>        <span class="dt">&quot;kty&quot;</span><span class="fu">:</span> <span class="st">&quot;RSA&quot;</span><span class="fu">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true"></a>        <span class="dt">&quot;n&quot;</span><span class="fu">:</span> <span class="st">&quot;vl-ZsAw5iTQO8b2fBOgWLdiJb9KqkljTtsoThHQiI8C7FAfphCpJeYPsHs8qxjK41oZtp4l3v6o-Dg1TJnJq-CEGawxIsk0AaXSCfi8KU8rPezDI-ykqKOT1aQ0_oLMoWfiD0s7PSo0rnQt4KxlcT4KwYHDnuc3s64YlzhWisBEoFMyT5EMdE-WGKmDXaheIkWlxuLn93TARAWpN3UU8vvf8jH-zDNkEfO4enrgXS0D7s56yujz1uHUCuKUWosflgk-nvac3WGcTjM9r8EOF_NleAM2mahdacM5Pd0XZ9vfeYUWjLlHaE2eSl9n8XU__ix1Kflb4AZpMKOnbsEnI9w&quot;</span><span class="fu">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true"></a>        <span class="dt">&quot;use&quot;</span><span class="fu">:</span> <span class="st">&quot;sig&quot;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true"></a>      <span class="fu">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true"></a>        <span class="dt">&quot;e&quot;</span><span class="fu">:</span> <span class="st">&quot;AQAB&quot;</span><span class="fu">,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true"></a>        <span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;entity-statement-key-2&quot;</span><span class="fu">,</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true"></a>        <span class="dt">&quot;kty&quot;</span><span class="fu">:</span> <span class="st">&quot;RSA&quot;</span><span class="fu">,</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true"></a>        <span class="dt">&quot;n&quot;</span><span class="fu">:</span> <span class="st">&quot;mjhhLGa5QTHr4EwFqqYnaa2mfnByaDsUueFY6tQoHBw9paRGV3vs7RcLv9DsOeqehDBJFedQyzObCLEOJZry7Z4_3ehXccf_J2ZLSwELhBp5iMlBfFGCY1NcGze2cmpaeMKqkuG6M7L3y5G2UdlytyXBb5labNNAECTmXkoMIj-j4H5oex8ZI1PaDRFLnaKlBceqNebgCjan7SkSkGRpvnIfjiZ77YCsf9gEGAPJF6pd3SHayQbmoxUAyM5OjuCtvhAyXJnIvG7InUeI8Qxlwb8vjxUj6v_BFU2wC5mBvomWUVTLZhXWuWOeS2JctppBCHUDYqgKsyjHzheThbeHjQ&quot;</span><span class="fu">,</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true"></a>        <span class="dt">&quot;use&quot;</span><span class="fu">:</span> <span class="st">&quot;sig&quot;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true"></a>      <span class="fu">}</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true"></a>    <span class="ot">]</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true"></a>  <span class="fu">},</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true"></a>  <span class="dt">&quot;iat&quot;</span><span class="fu">:</span> <span class="dv">1661212800</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="signed-jwks-1">Signed JWKS</h2>
+<h3 id="jwt-1">JWT</h3>
+<pre><code>eyJhbGciOiAiUlMyNTYiLCAia2lkIjogImVudGl0eS1zdGF0ZW1lbnQta2V5LTEiLCAidH
+lwIjogIkpXVCJ9.ew0KICAic3ViIjogImh0dHBzOi8vZXhhbXBsZS5jb20iLA0KICAiaXN
+zIjogImh0dHBzOi8vZXhhbXBsZS5jb20iLA0KICAia2V5cyI6IFsNCiAgICB7DQogICAgI
+CAiZSI6ICJBUUFCIiwNCiAgICAgICJraWQiOiAiaWQtdG9rZW4ta2V5LTEiLA0KICAgICA
+gImt0eSI6ICJSU0EiLA0KICAgICAgIm4iOiAidUNvRzdfeW5UYTdScndZZ0JqRlZBM3hsY
+WFBU2Z1Q053LWlYQTNidGRTSFN2N19fLWtXeWtwSFpfOUFGVGVMWnJFcFQ5MU80WlFZM19
+HNXZDREVaU2cwV1ZwSlBoM3FDR0NDQURCbUV3bmlLQllMQkM0Ml8xVS1fU1pKYmRud0gyU
+nNDTUtCWHNmamdvRUFGUVRWMkE5UHJDX0pQT0pDSTlkNWROLUFyNmdQMU9KaFlKY2RaeGh
+CV0lkTXZkVV9uQUlpZ3J2MjNUSEtHMTdTaDF1cTBKSW5fOUx0RVBxVE9Uc1J2NlVRWXRNY
+XhON1VFcWpxZ0pocXBTYV8wZTJFeEJvamhtdnY3eEZQV0JMTkFaZWhhcUIwajZQZWNCem9
+vWWdkemdJRE9OYlVxdzZ0TEU3LTdIcHRNN2pKc1NpaEV0OXlWTTEzanl1VkxrVTFRcGhxU
+EFRIiwNCiAgICAgICJ1c2UiOiAic2lnIg0KICAgIH0sDQogICAgew0KICAgICAgImUiOiA
+iQVFBQiIsDQogICAgICAia2lkIjogImlkLXRva2VuLWtleS0yIiwNCiAgICAgICJrdHkiO
+iAiUlNBIiwNCiAgICAgICJuIjogIjFBamdaTWtKcVVQczVmd0dicE9Fa2o3ZGF4SE85bU1
+lc0Y3ODIweXUxTG0tS2R2V2VCZG5weXc3M1BwQ29aYXRtLVhyMUtEeXo0Vi1VWjJSalpSR
+GRDSkhTVFRXaUVOS3cwS2xSNnZjaEJpNmlMeVNFU25sQkEwN1dwckoxX0xjZTNpRldVRVB
+hVEZHaGZWSFRmVHVfcS01TVpBTFVDOU0tdW1tUGxJdWVpMm9Fck1xTzJPSFFqYXkwd0JFS
+ml3U0FjNUxIejdCYlFwOVhzTVBPMGpOQW40T2tPdC1HazYtOHBLNnExSXR1c1gxVUFiekF
+vZW9kNDVMN2N4TmZBWER6OXFNRkJYeHNmOU44N3NhZDBSd0EyRUVmR2N3TUFXQ3oyQy1na
+jU0V2ZZMXlOc1dZRy1yMEhUbnhPZWxTOGJOM0dRT3Flc052N3VycU0yaXNld1F6dyIsDQo
+gICAgICAidXNlIjogInNpZyINCiAgICB9DQogIF0NCn0.GvoYwYAxw8G0o9iz6TeRtg1wy
+w1r9JXDN7lL94BKSBRKCSw7Fx3xO11PvNpcyNx97aemouXeVrDMeHArmIgOv8fm7bjBvbe
+017vAf-EH6iXEljabICyMzGh6vELcGSa5fJw6twfc6sPNmTJkkV96BLeaUikr6otPa7Vzw
+i3uYeiUt9E2qmqYjZHsDGwoXuss9WrvFAN6TAcsbjOC9buglkRd7LagAmNHhv4KY6mCXH-
+k1Wg3OJTFFCNqFm79DNnii3fo0PWolaFBkbJdVdtRpZGBjLdcRdtj1pB4G233ziVyrFZXj
+y4i3dzAKP4fnXW6Qbsj4SbEDbVGRHGvx6oe0g
+</code></pre>
+<h3 id="jwt-header-1">JWT header</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="fu">{</span><span class="dt">&quot;alg&quot;</span><span class="fu">:</span> <span class="st">&quot;RS256&quot;</span><span class="fu">,</span> <span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;entity-statement-key-1&quot;</span><span class="fu">,</span> <span class="dt">&quot;typ&quot;</span><span class="fu">:</span> <span class="st">&quot;JWT&quot;</span><span class="fu">}</span></span></code></pre></div>
+<h3 id="jwt-body-1">JWT body</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a>  <span class="dt">&quot;sub&quot;</span><span class="fu">:</span> <span class="st">&quot;https://example.com&quot;</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a>  <span class="dt">&quot;iss&quot;</span><span class="fu">:</span> <span class="st">&quot;https://example.com&quot;</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a>  <span class="dt">&quot;keys&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a>    <span class="fu">{</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a>      <span class="dt">&quot;e&quot;</span><span class="fu">:</span> <span class="st">&quot;AQAB&quot;</span><span class="fu">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a>      <span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;id-token-key-1&quot;</span><span class="fu">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a>      <span class="dt">&quot;kty&quot;</span><span class="fu">:</span> <span class="st">&quot;RSA&quot;</span><span class="fu">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a>      <span class="dt">&quot;n&quot;</span><span class="fu">:</span> <span class="st">&quot;uCoG7_ynTa7RrwYgBjFVA3xlaaASfuCNw-iXA3btdSHSv7__-kWykpHZ_9AFTeLZrEpT91O4ZQY3_G5vCDEZSg0WVpJPh3qCGCCADBmEwniKBYLBC42_1U-_SZJbdnwH2RsCMKBXsfjgoEAFQTV2A9PrC_JPOJCI9d5dN-Ar6gP1OJhYJcdZxhBWIdMvdU_nAIigrv23THKG17Sh1uq0JIn_9LtEPqTOTsRv6UQYtMaxN7UEqjqgJhqpSa_0e2ExBojhmvv7xFPWBLNAZehaqB0j6PecBzooYgdzgIDONbUqw6tLE7-7HptM7jJsSihEt9yVM13jyuVLkU1QphqPAQ&quot;</span><span class="fu">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a>      <span class="dt">&quot;use&quot;</span><span class="fu">:</span> <span class="st">&quot;sig&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true"></a>    <span class="fu">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true"></a>      <span class="dt">&quot;e&quot;</span><span class="fu">:</span> <span class="st">&quot;AQAB&quot;</span><span class="fu">,</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true"></a>      <span class="dt">&quot;kid&quot;</span><span class="fu">:</span> <span class="st">&quot;id-token-key-2&quot;</span><span class="fu">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true"></a>      <span class="dt">&quot;kty&quot;</span><span class="fu">:</span> <span class="st">&quot;RSA&quot;</span><span class="fu">,</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true"></a>      <span class="dt">&quot;n&quot;</span><span class="fu">:</span> <span class="st">&quot;1AjgZMkJqUPs5fwGbpOEkj7daxHO9mMesF7820yu1Lm-KdvWeBdnpyw73PpCoZatm-Xr1KDyz4V-UZ2RjZRDdCJHSTTWiENKw0KlR6vchBi6iLySESnlBA07WprJ1_Lce3iFWUEPaTFGhfVHTfTu_q-5MZALUC9M-ummPlIuei2oErMqO2OHQjay0wBEJiwSAc5LHz7BbQp9XsMPO0jNAn4OkOt-Gk6-8pK6q1ItusX1UAbzAoeod45L7cxNfAXDz9qMFBXxsf9N87sad0RwA2EEfGcwMAWCz2C-gj54WfY1yNsWYG-r0HTnxOelS8bN3GQOqesNv7urqM2isewQzw&quot;</span><span class="fu">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true"></a>      <span class="dt">&quot;use&quot;</span><span class="fu">:</span> <span class="st">&quot;sig&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true"></a>    <span class="fu">}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true"></a>  <span class="ot">]</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true"></a><span class="fu">}</span></span></code></pre></div>
+</body>
+</html>

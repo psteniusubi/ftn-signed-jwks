@@ -1,0 +1,20 @@
+{
+  "sub": "https://example.com",
+  "iss": "https://example.com",
+  "keys": [
+    {
+      "e": "AQAB",
+      "kid": "id-token-key-1",
+      "kty": "RSA",
+      "n": "uCoG7_ynTa7RrwYgBjFVA3xlaaASfuCNw-iXA3btdSHSv7__-kWykpHZ_9AFTeLZrEpT91O4ZQY3_G5vCDEZSg0WVpJPh3qCGCCADBmEwniKBYLBC42_1U-_SZJbdnwH2RsCMKBXsfjgoEAFQTV2A9PrC_JPOJCI9d5dN-Ar6gP1OJhYJcdZxhBWIdMvdU_nAIigrv23THKG17Sh1uq0JIn_9LtEPqTOTsRv6UQYtMaxN7UEqjqgJhqpSa_0e2ExBojhmvv7xFPWBLNAZehaqB0j6PecBzooYgdzgIDONbUqw6tLE7-7HptM7jJsSihEt9yVM13jyuVLkU1QphqPAQ",
+      "use": "sig"
+    },
+    {
+      "e": "AQAB",
+      "kid": "id-token-key-2",
+      "kty": "RSA",
+      "n": "1AjgZMkJqUPs5fwGbpOEkj7daxHO9mMesF7820yu1Lm-KdvWeBdnpyw73PpCoZatm-Xr1KDyz4V-UZ2RjZRDdCJHSTTWiENKw0KlR6vchBi6iLySESnlBA07WprJ1_Lce3iFWUEPaTFGhfVHTfTu_q-5MZALUC9M-ummPlIuei2oErMqO2OHQjay0wBEJiwSAc5LHz7BbQp9XsMPO0jNAn4OkOt-Gk6-8pK6q1ItusX1UAbzAoeod45L7cxNfAXDz9qMFBXxsf9N87sad0RwA2EEfGcwMAWCz2C-gj54WfY1yNsWYG-r0HTnxOelS8bN3GQOqesNv7urqM2isewQzw",
+      "use": "sig"
+    }
+  ]
+}

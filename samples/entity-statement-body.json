@@ -1,0 +1,30 @@
+{
+  "exp": 1724371200,
+  "sub": "https://example.com",
+  "iss": "https://example.com",
+  "metadata": {
+    "openid_provider": {
+      "signed_jwks_uri": "https://idp.example.com/signed-jwks",
+      "issuer": "https://idp.example.com"
+    }
+  },
+  "jwks": {
+    "keys": [
+      {
+        "e": "AQAB",
+        "kid": "entity-statement-key-1",
+        "kty": "RSA",
+        "n": "vl-ZsAw5iTQO8b2fBOgWLdiJb9KqkljTtsoThHQiI8C7FAfphCpJeYPsHs8qxjK41oZtp4l3v6o-Dg1TJnJq-CEGawxIsk0AaXSCfi8KU8rPezDI-ykqKOT1aQ0_oLMoWfiD0s7PSo0rnQt4KxlcT4KwYHDnuc3s64YlzhWisBEoFMyT5EMdE-WGKmDXaheIkWlxuLn93TARAWpN3UU8vvf8jH-zDNkEfO4enrgXS0D7s56yujz1uHUCuKUWosflgk-nvac3WGcTjM9r8EOF_NleAM2mahdacM5Pd0XZ9vfeYUWjLlHaE2eSl9n8XU__ix1Kflb4AZpMKOnbsEnI9w",
+        "use": "sig"
+      },
+      {
+        "e": "AQAB",
+        "kid": "entity-statement-key-2",
+        "kty": "RSA",
+        "n": "mjhhLGa5QTHr4EwFqqYnaa2mfnByaDsUueFY6tQoHBw9paRGV3vs7RcLv9DsOeqehDBJFedQyzObCLEOJZry7Z4_3ehXccf_J2ZLSwELhBp5iMlBfFGCY1NcGze2cmpaeMKqkuG6M7L3y5G2UdlytyXBb5labNNAECTmXkoMIj-j4H5oex8ZI1PaDRFLnaKlBceqNebgCjan7SkSkGRpvnIfjiZ77YCsf9gEGAPJF6pd3SHayQbmoxUAyM5OjuCtvhAyXJnIvG7InUeI8Qxlwb8vjxUj6v_BFU2wC5mBvomWUVTLZhXWuWOeS2JctppBCHUDYqgKsyjHzheThbeHjQ",
+        "use": "sig"
+      }
+    ]
+  },
+  "iat": 1661212800
+}
