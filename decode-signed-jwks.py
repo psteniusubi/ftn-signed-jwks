@@ -1,5 +1,5 @@
 #
-# usage decode-entity-statement.py entity-statement.jwt signed-jwks.jwt
+# usage decode-signed-jwks.py entity-statement.jwt signed-jwks.jwt
 #
 
 import sys
